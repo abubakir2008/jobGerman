@@ -1,9 +1,10 @@
 import enum
+from typing import Any
 
-from sqlalchemy import Enum, String, Text
+from sqlalchemy import Enum, JSON, String, Text, Boolean
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.models import Base, TimestampMixin
+from app.models.base import Base, TimestampMixin
 
 
 class MediaType(str, enum.Enum):
@@ -24,7 +25,16 @@ class Media(Base, TimestampMixin):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     title: Mapped[str] = mapped_column(String(255), nullable=False)
+
+    # Текстовое описание / инструкция к уроку
     description: Mapped[str | None] = mapped_column(Text)
+
+    # Подробная инструкция (markdown или plain text)
+    instruction: Mapped[str | None] = mapped_column(Text)
+
+    # Полезные ссылки: [{"label": "Официальный сайт", "url": "https://..."}]
+    useful_links: Mapped[list[dict[str, Any]] | None] = mapped_column(JSON, default=list)
+
     media_type: Mapped[MediaType] = mapped_column(Enum(MediaType), nullable=False)
     category: Mapped[MediaCategory] = mapped_column(Enum(MediaCategory), nullable=False, index=True)
     file_url: Mapped[str] = mapped_column(String(500), nullable=False)
@@ -32,7 +42,7 @@ class Media(Base, TimestampMixin):
     file_size: Mapped[int | None] = mapped_column()
     mime_type: Mapped[str | None] = mapped_column(String(100))
     thumbnail_url: Mapped[str | None] = mapped_column(String(500))
-    is_published: Mapped[bool] = mapped_column(default=True)
+    is_published: Mapped[bool] = mapped_column(Boolean, default=True)
 
     def __repr__(self) -> str:
-        return f"<Media {self.title} ({self.media_type})>" 
+        return f"<Media {self.title} ({self.media_type})>"

@@ -4,6 +4,7 @@ from sqlalchemy import Enum, ForeignKey, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base, TimestampMixin
+from app.models.relocation import RelocationCase
 
 
 class ApplicationStatus(str, enum.Enum):
@@ -37,4 +38,4 @@ class Application(Base, TimestampMixin):
     )
 
     def __repr__(self) -> str:
-        return f"<Application candidate={self.candidate_id} job={self.job_id}>" 
+        return f"<Application candidate={self.candidate_id} job={self.job_id}>"

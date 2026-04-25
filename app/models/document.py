@@ -3,7 +3,8 @@ import enum
 from sqlalchemy import Enum, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.models import Base, TimestampMixin
+from app.models.base import Base , TimestampMixin
+
 
 
 class DocumentType(str, enum.Enum):
