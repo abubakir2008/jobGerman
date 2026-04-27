@@ -57,19 +57,29 @@ class ApplicationRepository:
     async def create(self, candidate_id: int, data: ApplicationCreate) -> Application:
         application = Application(candidate_id=candidate_id, **data.model_dump())
         self.db.add(application)
-        await self.db.flush()  # получаем id без commit
+        await self.db.flush()
 
-        # Автоматически создаём RelocationCase
         relocation_case = RelocationCase(application_id=application.id)
         self.db.add(relocation_case)
-
         await self.db.commit()
-        await self.db.refresh(application)
-        return application
+
+        # Перезагружаем с relocation_case
+        result = await self.db.execute(
+            select(Application)
+            .options(selectinload(Application.relocation_case))
+            .where(Application.id == application.id)
+        )
+        return result.scalar_one()
 
     async def update(self, application: Application, data: ApplicationUpdate) -> Application:
         for field, value in data.model_dump(exclude_unset=True).items():
             setattr(application, field, value)
         await self.db.commit()
-        await self.db.refresh(application)
-        return application 
+
+        # Перезагружаем с relocation_case
+        result = await self.db.execute(
+            select(Application)
+            .options(selectinload(Application.relocation_case))
+            .where(Application.id == application.id)
+        )
+        return result.scalar_one()

@@ -7,6 +7,7 @@ from app.api.v1.endpoints import (
     relocation_router,
     document_router,
     media_router,
+    user_router,
 )
 
 router = APIRouter(prefix="/api/v1")
@@ -18,3 +19,4 @@ router.include_router(application_router.router,  prefix="/applications", tags=[
 router.include_router(relocation_router.router,   prefix="/cases",        tags=["Relocation Cases"])
 router.include_router(document_router.router,     prefix="/documents",    tags=["Documents"])
 router.include_router(media_router.router,        prefix="/media",        tags=["Media"])
+router.include_router(user_router.router,         prefix="/users",        tags=["Users (Admin)"])

@@ -1,9 +1,8 @@
-from sqlalchemy import select
+from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.user import User
-from app.schemas.auth import UserRegister
-from app.config.security import hash_password
+from app.schemas.user import UserRoleUpdate
 
 
 class UserRepository:
@@ -23,7 +22,24 @@ class UserRepository:
         )
         return result.scalar_one_or_none()
 
-    async def create(self, data: UserRegister) -> User:
+    async def get_all(
+        self,
+        offset: int = 0,
+        limit: int = 20,
+    ) -> tuple[list[User], int]:
+        query = select(User)
+        total = await self.db.scalar(select(func.count()).select_from(query.subquery()))
+        result = await self.db.execute(query.offset(offset).limit(limit))
+        return result.scalars().all(), total
+
+    async def update_role(self, user: User, data: UserRoleUpdate) -> User:
+        user.role = data.role
+        await self.db.commit()
+        await self.db.refresh(user)
+        return user
+
+    async def create(self, data) -> User:
+        from app.config.security import hash_password
         user = User(
             email=data.email,
             hashed_password=hash_password(data.password),

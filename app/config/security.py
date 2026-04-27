@@ -1,18 +1,24 @@
 from datetime import datetime, timedelta, timezone
-
+# импорт необходимых библиотек для безопасности и работы с JWT, а также для хэширования паролей
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from sqlalchemy.ext.asyncio import AsyncSession
-
+# импорт настроек и функции получения базы данных
 from app.config.config import settings
 from app.config.database import get_db
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+pwd_context = CryptContext(
+    schemes=["bcrypt"],
+    deprecated="auto",
+    bcrypt__ident="2b",
+)
+
+
 bearer_scheme = HTTPBearer()
 
-
+# нельзя трагать методы ниже, иначе сломается безопасность, если нужно что-то изменить, то только в рамках этих методов, а не их логики
 def hash_password(password: str) -> str:
     return pwd_context.hash(password)
 

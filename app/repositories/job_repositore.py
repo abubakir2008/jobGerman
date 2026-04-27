@@ -53,11 +53,9 @@ class JobRepository:
         if category_id:
             query = query.where(Job.category_id == category_id)
 
-        # total count
         count_query = select(func.count()).select_from(query.subquery())
         total = await self.db.scalar(count_query)
 
-        # paginated results
         query = query.offset(offset).limit(limit)
         result = await self.db.execute(query)
         return result.scalars().all(), total
@@ -74,16 +72,28 @@ class JobRepository:
         job = Job(**data.model_dump())
         self.db.add(job)
         await self.db.commit()
-        await self.db.refresh(job)
-        return job
+
+        # Перезагружаем с category
+        result = await self.db.execute(
+            select(Job)
+            .options(selectinload(Job.category))
+            .where(Job.id == job.id)
+        )
+        return result.scalar_one()
 
     async def update(self, job: Job, data: JobUpdate) -> Job:
         for field, value in data.model_dump(exclude_unset=True).items():
             setattr(job, field, value)
         await self.db.commit()
-        await self.db.refresh(job)
-        return job
+
+        # Перезагружаем с category
+        result = await self.db.execute(
+            select(Job)
+            .options(selectinload(Job.category))
+            .where(Job.id == job.id)
+        )
+        return result.scalar_one()
 
     async def delete(self, job: Job) -> None:
         await self.db.delete(job)
-        await self.db.commit() 
+        await self.db.commit()
