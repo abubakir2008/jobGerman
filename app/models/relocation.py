@@ -1,6 +1,7 @@
 import enum
+from datetime import date
 
-from sqlalchemy import Enum, ForeignKey, Text
+from sqlalchemy import Date, Enum, ForeignKey, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base, TimestampMixin
@@ -29,6 +30,7 @@ class RelocationCase(Base, TimestampMixin):
         Enum(RelocationStage), default=RelocationStage.applied, index=True
     )
     notes: Mapped[str | None] = mapped_column(Text)
+    stage_deadline: Mapped[date | None] = mapped_column(Date)
 
     # Relationships
     application: Mapped["Application"] = relationship(back_populates="relocation_case")  # noqa: F821

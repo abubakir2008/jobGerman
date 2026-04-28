@@ -5,6 +5,9 @@ from app.models.application import Application, ApplicationStatus
 from app.models.relocation import RelocationCase, RelocationStage
 from app.models.document import Document, DocumentType
 from app.models.media import Media, MediaType, MediaCategory
+from app.models.case_stage_history import CaseStageHistory
+from app.models.chat_message import ChatMessage
+from app.models.notification import Notification, NotificationType
 
 __all__ = [
     "Base", "TimestampMixin",
@@ -14,4 +17,7 @@ __all__ = [
     "RelocationCase", "RelocationStage",
     "Document", "DocumentType",
     "Media", "MediaType", "MediaCategory",
-] 
+    "CaseStageHistory",
+    "ChatMessage",
+    "Notification", "NotificationType",
+]

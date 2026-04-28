@@ -1,7 +1,9 @@
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from app.models.relocation import RelocationCase, RelocationStage
+from app.models.application import Application, ApplicationStatus
 from app.schemas.relocation import RelocationCaseUpdate
 
 
@@ -45,4 +47,22 @@ class RelocationCaseRepository:
             setattr(case, field, value)
         await self.db.commit()
         await self.db.refresh(case)
-        return case 
+        return case
+
+    async def get_application_status(self, case_id: int) -> ApplicationStatus | None:
+        """Статус заявки для данного кейса."""
+        result = await self.db.execute(
+            select(Application.status)
+            .join(RelocationCase, Application.id == RelocationCase.application_id)
+            .where(RelocationCase.id == case_id)
+        )
+        return result.scalar_one_or_none()
+
+    async def get_candidate_user_id(self, case_id: int) -> int | None:
+        """user_id кандидата для данного кейса."""
+        result = await self.db.execute(
+            select(Application.candidate_id)
+            .join(RelocationCase, Application.id == RelocationCase.application_id)
+            .where(RelocationCase.id == case_id)
+        )
+        return result.scalar_one_or_none() 

@@ -43,6 +43,15 @@ def decode_access_token(token: str) -> str | None:
         return None
 
 
+def decode_token(token: str) -> int | None:
+    """Декодирует JWT и возвращает user_id как int (для WebSocket)."""
+    sub = decode_access_token(token)
+    try:
+        return int(sub) if sub else None
+    except (ValueError, TypeError):
+        return None
+
+
 async def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme),
     db: AsyncSession = Depends(get_db),

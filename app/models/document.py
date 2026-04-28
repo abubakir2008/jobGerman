@@ -12,6 +12,7 @@ class DocumentType(str, enum.Enum):
     cv = "cv"
     diploma = "diploma"
     translation = "translation"
+    visa = "visa"
     other = "other"
 
 

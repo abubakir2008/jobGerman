@@ -2,6 +2,7 @@ from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.document import Document, DocumentType
+from app.models.user import CandidateProfile
 
 
 class DocumentRepository:
@@ -53,4 +54,13 @@ class DocumentRepository:
 
     async def delete(self, document: Document) -> None:
         await self.db.delete(document)
-        await self.db.commit() 
+        await self.db.commit()
+
+    async def get_doc_types_for_user(self, user_id: int) -> set[DocumentType]:
+        """Возвращает типы загруженных документов кандидата по user_id."""
+        result = await self.db.execute(
+            select(Document.doc_type)
+            .join(CandidateProfile, Document.candidate_id == CandidateProfile.id)
+            .where(CandidateProfile.user_id == user_id)
+        )
+        return set(result.scalars().all()) 
