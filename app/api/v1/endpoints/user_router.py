@@ -1,8 +1,10 @@
 from fastapi import APIRouter, Depends, Query, HTTPException, status
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config.database import get_db
-from app.config.security import require_admin
+from app.config.security import get_current_user, require_admin
+from app.models.user import User, UserRole
 from app.repositories.user_repository import UserRepository
 from app.schemas.user import UserRoleUpdate, UserResponse, UserListResponse
 
@@ -26,6 +28,25 @@ async def get_all_users(
         items=[UserResponse.model_validate(u) for u in users],
         total=total,
     )
+
+
+@router.get("/managers", response_model=list[UserResponse])
+async def get_managers(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Список менеджеров и админов — для dropdown «Назначить менеджера».
+
+    Доступно любому авторизованному (manager/admin/candidate), потому что
+    кандидат может видеть, кто ведёт его кейс.
+    """
+    result = await db.execute(
+        select(User)
+        .where(User.role.in_([UserRole.manager, UserRole.admin]))
+        .where(User.is_active.is_(True))
+        .order_by(User.full_name)
+    )
+    return [UserResponse.model_validate(u) for u in result.scalars().all()]
 
 
 @router.get("/{user_id}", response_model=UserResponse)

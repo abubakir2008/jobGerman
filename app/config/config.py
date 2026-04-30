@@ -25,6 +25,9 @@ class Settings(BaseSettings):
     MINIO_SECRET_KEY: str
     MINIO_BUCKET_NAME: str = "germany-jobs"
     MINIO_USE_SSL: bool = False
+    # Публичный хост MinIO — то, что доступно браузеру (через docker port-forward).
+    # Используется при генерации presigned URL для view/download.
+    MINIO_PUBLIC_ENDPOINT: str = "localhost:9000"
 
 
 settings = Settings()

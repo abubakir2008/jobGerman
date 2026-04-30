@@ -1,10 +1,10 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config.database import get_db
 from app.dependencies.auth import get_current_user
 from app.models.application import ApplicationStatus
-from app.models.user import User
+from app.models.user import User, UserRole
 from app.repositories.application_repository import ApplicationRepository
 from app.schemas.appliction import (
     ApplicationCreate, ApplicationUpdate,
@@ -45,7 +45,17 @@ async def get_application(
     current_user: User = Depends(get_current_user),
     service: ApplicationService = Depends(get_application_service),
 ):
-    return await service.get_by_id(application_id)
+    app_resp = await service.get_by_id(application_id)
+    # Доступ: владелец-кандидат, manager/admin
+    if (
+        current_user.role not in (UserRole.manager, UserRole.admin)
+        and current_user.id != app_resp.candidate_id
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You can only view your own applications.",
+        )
+    return app_resp
 
 
 @router.post("", response_model=ApplicationResponse, status_code=201)

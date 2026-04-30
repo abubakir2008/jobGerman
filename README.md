@@ -16,10 +16,7 @@
 - [Технологии](#технологии)
 - [Запуск проекта](#запуск-проекта)
 - [MVP](#mvp)
-<<<<<<< HEAD
-=======
 - [Расширение функционала (v2)](#расширение-функционала-v2)
->>>>>>> 6a22f13 ([ADD] - notification-crud,  checking documents when the client's status changes)
 
 ---
 
@@ -36,11 +33,11 @@
 
 ## Роли пользователей
 
-| Роль                    | Описание                                                               |
-| ----------------------- | ---------------------------------------------------------------------- |
-| **Candidate (Student)** | Соискатель сезонной работы                                             |
-| **Candidate (Worker)**  | Соискатель на полную занятость                                         |
-| **Manager**             | Ведёт кандидатов по этапам релокации, контролирует документы и статусы |
+| Роль                    | Описание                                                                |
+| ----------------------- | ----------------------------------------------------------------------- |
+| **Candidate (Student)** | Соискатель сезонной работы                                              |
+| **Candidate (Worker)**  | Соискатель на полную занятость                                          |
+| **Manager**             | Ведёт кандидатов по этапам релокации, контролирует документы и статусы  |
 | **Admin**               | Управляет вакансиями, категориями, пользователями и обучающим контентом |
 
 ---
@@ -100,11 +97,11 @@ applied → interview → documents → visa → relocation → completed
 
 Обучающий контент:
 
-| Тип              | Категории                                      |
-| ---------------- | ---------------------------------------------- |
-| `video`          | `visa`, `interview`, `relocation`, `work_in_germany` |
-| `image`          | те же категории                                |
-| `document`       | те же категории                                |
+| Тип        | Категории                                            |
+| ---------- | ---------------------------------------------------- |
+| `video`    | `visa`, `interview`, `relocation`, `work_in_germany` |
+| `image`    | те же категории                                      |
+| `document` | те же категории                                      |
 
 - Инструкции (текст) и полезные ссылки (JSON)
 - Статус публикации (`is_published`)
@@ -143,44 +140,45 @@ app/
 
 **PostgreSQL 16** — таблицы:
 
-| Таблица                  | Назначение                                          |
-| ------------------------ | --------------------------------------------------- |
-| `users`                  | Аккаунты, роли, статус                              |
-| `candidate_profiles`     | Профили кандидатов                                  |
-| `jobs`                   | Вакансии (тип, статус, зарплата)                    |
-| `job_categories`         | Категории вакансий                                  |
-| `applications`           | Отклики кандидатов на вакансии                      |
-| `relocation_cases`       | Кейсы сопровождения (этапы, менеджер, дедлайн) *v2* |
-| `documents`              | Метаданные загруженных документов                   |
-| `media`                  | Обучающий контент                                   |
-| `case_stage_history`     | История переходов по этапам кейса *v2*              |
-| `notifications`          | Уведомления для кандидатов *v2*                     |
-| `chat_messages`          | Сообщения чата кандидат ↔ менеджер *v2*             |
+| Таблица              | Назначение                                          |
+| -------------------- | --------------------------------------------------- |
+| `users`              | Аккаунты, роли, статус                              |
+| `candidate_profiles` | Профили кандидатов                                  |
+| `jobs`               | Вакансии (тип, статус, зарплата)                    |
+| `job_categories`     | Категории вакансий                                  |
+| `applications`       | Отклики кандидатов на вакансии                      |
+| `relocation_cases`   | Кейсы сопровождения (этапы, менеджер, дедлайн) _v2_ |
+| `documents`          | Метаданные загруженных документов                   |
+| `media`              | Обучающий контент                                   |
+| `case_stage_history` | История переходов по этапам кейса _v2_              |
+| `notifications`      | Уведомления для кандидатов _v2_                     |
+| `chat_messages`      | Сообщения чата кандидат ↔ менеджер _v2_             |
 
 **Новые поля в `relocation_cases` (v2):**
+
 - `stage_deadline` — дата дедлайна текущего этапа (Date, nullable)
 
 **Таблица `case_stage_history` (v2):**
 
-| Поле | Тип | Описание |
-|------|-----|---------|
-| `id` | UUID | PK |
-| `case_id` | UUID | FK → relocation_cases |
-| `stage` | Enum | Этап на который перешли |
-| `changed_by` | UUID | FK → users (менеджер) |
-| `changed_at` | DateTime | Дата и время перехода |
-| `note` | Text | Заметка менеджера при переходе |
+| Поле         | Тип      | Описание                       |
+| ------------ | -------- | ------------------------------ |
+| `id`         | UUID     | PK                             |
+| `case_id`    | UUID     | FK → relocation_cases          |
+| `stage`      | Enum     | Этап на который перешли        |
+| `changed_by` | UUID     | FK → users (менеджер)          |
+| `changed_at` | DateTime | Дата и время перехода          |
+| `note`       | Text     | Заметка менеджера при переходе |
 
 **Таблица `notifications` (v2):**
 
-| Поле | Тип | Описание |
-|------|-----|---------|
-| `id` | UUID | PK |
-| `user_id` | UUID | FK → users (кандидат) |
-| `type` | Enum | `stage_change`, `document_required`, `manager_note` |
-| `message` | Text | Текст уведомления |
-| `is_read` | Bool | Прочитано или нет |
-| `created_at` | DateTime | Дата создания |
+| Поле         | Тип      | Описание                                            |
+| ------------ | -------- | --------------------------------------------------- |
+| `id`         | UUID     | PK                                                  |
+| `user_id`    | UUID     | FK → users (кандидат)                               |
+| `type`       | Enum     | `stage_change`, `document_required`, `manager_note` |
+| `message`    | Text     | Текст уведомления                                   |
+| `is_read`    | Bool     | Прочитано или нет                                   |
+| `created_at` | DateTime | Дата создания                                       |
 
 > Файлы не хранятся в БД. Используется MinIO (S3-совместимое хранилище). В БД хранятся только `file_url` и метаданные.
 
@@ -310,15 +308,16 @@ GET    /health                             {"status": "ok", "version": "0.1.0"}
 
 **Gate-проверки при переходе между этапами (v2):**
 
-| Переход | Обязательное условие |
-|--------|----------------------|
-| `applied → interview` | Заявка в статусе `reviewing` или `accepted` |
-| `interview → documents` | Менеджер добавил заметку (подтверждение интервью) |
-| `documents → visa` | Загружены документы: `passport`, `cv`, `diploma` |
-| `visa → relocation` | Загружен документ типа `visa` |
+| Переход                  | Обязательное условие                                                |
+| ------------------------ | ------------------------------------------------------------------- |
+| `applied → interview`    | Заявка в статусе `reviewing` или `accepted`                         |
+| `interview → documents`  | Менеджер добавил заметку (подтверждение интервью)                   |
+| `documents → visa`       | Загружены документы: `passport`, `cv`, `diploma`                    |
+| `visa → relocation`      | Загружен документ типа `visa`                                       |
 | `relocation → completed` | Менеджер явно подтверждает финал (`"confirm": true` в теле запроса) |
 
 При нарушении условия → `400 Bad Request`:
+
 ```json
 { "detail": "Required documents missing: visa" }
 ```
@@ -334,20 +333,20 @@ GET    /health                             {"status": "ok", "version": "0.1.0"}
 
 ## Технологии
 
-| Слой              | Технология                         |
-| ----------------- | ---------------------------------- |
-| **Framework**     | FastAPI + Uvicorn                  |
-| **Язык**          | Python 3.11+                       |
-| **ORM**           | SQLAlchemy 2.0 (async)             |
-| **БД**            | PostgreSQL 16                      |
-| **Миграции**      | Alembic                            |
-| **Авторизация**   | JWT (python-jose) + bcrypt         |
-| **Хранилище**     | MinIO (S3-совместимое)             |
-| **Валидация**     | Pydantic v2                        |
-| **Async драйвер** | asyncpg                            |
-| **Контейнеры**    | Docker + Docker Compose            |
-| **Тесты**         | pytest + pytest-asyncio            |
-| **Линтер**        | ruff                               |
+| Слой              | Технология                 |
+| ----------------- | -------------------------- |
+| **Framework**     | FastAPI + Uvicorn          |
+| **Язык**          | Python 3.11+               |
+| **ORM**           | SQLAlchemy 2.0 (async)     |
+| **БД**            | PostgreSQL 16              |
+| **Миграции**      | Alembic                    |
+| **Авторизация**   | JWT (python-jose) + bcrypt |
+| **Хранилище**     | MinIO (S3-совместимое)     |
+| **Валидация**     | Pydantic v2                |
+| **Async драйвер** | asyncpg                    |
+| **Контейнеры**    | Docker + Docker Compose    |
+| **Тесты**         | pytest + pytest-asyncio    |
+| **Линтер**        | ruff                       |
 
 ---
 
@@ -385,11 +384,11 @@ docker-compose down
 
 ### Полезные ссылки
 
-| Сервис           | URL                           |
-| ---------------- | ----------------------------- |
-| API документация | http://localhost:8000/docs    |
-| Redoc            | http://localhost:8000/redoc   |
-| MinIO консоль    | http://localhost:9001         |
+| Сервис           | URL                         |
+| ---------------- | --------------------------- |
+| API документация | http://localhost:8000/docs  |
+| Redoc            | http://localhost:8000/redoc |
+| MinIO консоль    | http://localhost:9001       |
 
 ---
 
@@ -409,8 +408,6 @@ docker-compose down
 
 ---
 
-<<<<<<< HEAD
-=======
 ---
 
 ## Расширение функционала (v2)
@@ -421,13 +418,14 @@ docker-compose down
 
 **Затронутые файлы:**
 
-| Файл | Изменение |
-|------|-----------|
-| `models/document.py` | Добавить значение `visa` в enum типов документов |
-| `service/relocation_service.py` | Новая функция `check_stage_requirements(case_id, next_stage)` |
-| `api/v1/endpoints/relocation.py` | Вызов проверки перед `advance`, возврат `400` с деталями |
+| Файл                             | Изменение                                                     |
+| -------------------------------- | ------------------------------------------------------------- |
+| `models/document.py`             | Добавить значение `visa` в enum типов документов              |
+| `service/relocation_service.py`  | Новая функция `check_stage_requirements(case_id, next_stage)` |
+| `api/v1/endpoints/relocation.py` | Вызов проверки перед `advance`, возврат `400` с деталями      |
 
 **Алгоритм `check_stage_requirements`:**
+
 ```
 documents → visa:
   проверить наличие документов passport + cv + diploma у кандидата этого кейса
@@ -443,13 +441,13 @@ relocation → completed:
 ```
 
 ---
->>>>>>> 6a22f13 ([ADD] - notification-crud,  checking documents when the client's status changes)
 
 ### P1 — Чеклист требований `GET /cases/:id/requirements`
 
 **Новый эндпоинт** — возвращает список требований для перехода на следующий этап.
 
 **Ответ:**
+
 ```json
 {
   "current_stage": "documents",
@@ -457,13 +455,14 @@ relocation → completed:
   "can_advance": false,
   "requirements": [
     { "key": "passport", "label": "Паспорт", "done": true },
-    { "key": "cv",       "label": "CV",      "done": true },
-    { "key": "diploma",  "label": "Диплом",  "done": false }
+    { "key": "cv", "label": "CV", "done": true },
+    { "key": "diploma", "label": "Диплом", "done": false }
   ]
 }
 ```
 
 **Затронутые файлы:**
+
 - `service/relocation_service.py` — функция `get_stage_requirements(case_id)`
 - `api/v1/endpoints/relocation.py` — новый роут `GET /cases/{case_id}/requirements`
 - `schemas/relocation.py` — схема `StageRequirementsResponse`
@@ -475,6 +474,7 @@ relocation → completed:
 **Новая таблица** `case_stage_history` + эндпоинт.
 
 **Затронутые файлы:**
+
 - `models/case_stage_history.py` — новая ORM-модель
 - `repositories/case_history_repository.py` — `create_history_entry`, `get_history_by_case`
 - `service/relocation_service.py` — вызов `create_history_entry` при каждом `advance`
@@ -489,12 +489,14 @@ relocation → completed:
 **Поле `stage_deadline`** в таблице `relocation_cases`.
 
 Менеджер при обновлении кейса передаёт:
+
 ```json
 PATCH /cases/:id
 { "stage_deadline": "2025-06-15" }
 ```
 
 **Затронутые файлы:**
+
 - `models/relocation_case.py` — поле `stage_deadline: Date | None`
 - `schemas/relocation.py` — поле в `RelocationCaseUpdate` и `RelocationCaseResponse`
 - Alembic-миграция
@@ -507,25 +509,27 @@ PATCH /cases/:id
 
 **Таблица `chat_messages`:**
 
-| Поле | Тип | Описание |
-|------|-----|---------|
-| `id` | UUID | PK |
-| `case_id` | UUID | FK → relocation_cases |
-| `sender_id` | UUID | FK → users |
-| `message` | Text | Текст сообщения |
-| `is_read` | Bool | Прочитано получателем |
-| `created_at` | DateTime | Время отправки |
+| Поле         | Тип      | Описание              |
+| ------------ | -------- | --------------------- |
+| `id`         | UUID     | PK                    |
+| `case_id`    | UUID     | FK → relocation_cases |
+| `sender_id`  | UUID     | FK → users            |
+| `message`    | Text     | Текст сообщения       |
+| `is_read`    | Bool     | Прочитано получателем |
+| `created_at` | DateTime | Время отправки        |
 
 **WebSocket-протокол (`WS /ws/chat/{case_id}`):**
 
 Авторизация через query-параметр: `?token=<JWT>`
 
 Входящее сообщение от клиента:
+
 ```json
 { "message": "Здравствуйте, когда интервью?" }
 ```
 
 Исходящее сообщение всем участникам чата:
+
 ```json
 {
   "id": "uuid",
@@ -540,6 +544,7 @@ PATCH /cases/:id
 **Менеджер видит непрочитанные** — счётчик `unread_count` в списке кейсов.
 
 **Затронутые файлы:**
+
 - `models/chat_message.py` — ORM-модель
 - `repositories/chat_repository.py` — `save_message`, `get_messages`, `mark_read`
 - `service/chat_service.py` — бизнес-логика, проверка доступа
@@ -554,11 +559,13 @@ PATCH /cases/:id
 **Новая таблица** `notifications` + два эндпоинта.
 
 Уведомления создаются автоматически при:
+
 - Смене этапа (`stage_change`)
 - Необходимости загрузить документы (`document_required`)
 - Заметке менеджера (`manager_note`)
 
 **Затронутые файлы:**
+
 - `models/notification.py` — новая ORM-модель
 - `repositories/notification_repository.py` — `create`, `get_by_user`, `mark_read`
 - `service/notification_service.py` — `notify_candidate(user_id, type, message)`

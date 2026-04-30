@@ -53,6 +53,21 @@ class RelocationCaseService:
         self.history_repo = history_repo
         self.notif_repo = notif_repo
 
+    @staticmethod
+    def _build_response(row: dict) -> RelocationCaseResponse:
+        case = row["case"]
+        return RelocationCaseResponse(
+            id=case.id,
+            application_id=case.application_id,
+            manager_id=case.manager_id,
+            stage=case.stage,
+            notes=case.notes,
+            stage_deadline=case.stage_deadline,
+            candidate=row["candidate"],
+            manager=row["manager"],
+            job_title=row["job_title"],
+        )
+
     async def get_all(
         self,
         manager_id: int | None = None,
@@ -60,28 +75,28 @@ class RelocationCaseService:
         offset: int = 0,
         limit: int = 20,
     ) -> RelocationCaseListResponse:
-        cases, total = await self.repo.get_all(
-            manager_id=manager_id, stage=stage, offset=offset, limit=limit
+        rows, total = await self.repo.get_enriched_list(
+            manager_id=manager_id, stage=stage, offset=offset, limit=limit,
         )
         return RelocationCaseListResponse(
-            items=[RelocationCaseResponse.model_validate(c) for c in cases],
+            items=[self._build_response(r) for r in rows],
             total=total,
         )
 
     async def get_by_id(self, case_id: int) -> RelocationCaseResponse:
-        case = await self.repo.get_by_id(case_id)
-        if not case:
+        row = await self.repo.get_enriched_by_id(case_id)
+        if not row:
             raise HTTPException(status.HTTP_404_NOT_FOUND, detail=f"Case {case_id} not found.")
-        return RelocationCaseResponse.model_validate(case)
+        return self._build_response(row)
 
     async def get_by_application(self, application_id: int) -> RelocationCaseResponse:
-        case = await self.repo.get_by_application_id(application_id)
-        if not case:
+        row = await self.repo.get_enriched_by_application_id(application_id)
+        if not row:
             raise HTTPException(
                 status.HTTP_404_NOT_FOUND,
                 detail=f"Case for application {application_id} not found.",
             )
-        return RelocationCaseResponse.model_validate(case)
+        return self._build_response(row)
 
     async def update(self, case_id: int, data: RelocationCaseUpdate) -> RelocationCaseResponse:
         case = await self.repo.get_by_id(case_id)
@@ -96,8 +111,9 @@ class RelocationCaseService:
                     detail=f"Invalid stage transition: {case.stage} → {data.stage}. Expected: {allowed_next}.",
                 )
 
-        updated = await self.repo.update(case, data)
-        return RelocationCaseResponse.model_validate(updated)
+        await self.repo.update(case, data)
+        row = await self.repo.get_enriched_by_id(case_id)
+        return self._build_response(row)
 
     async def get_requirements(self, case_id: int) -> StageRequirementsResponse:
         case = await self.repo.get_by_id(case_id)
@@ -158,7 +174,7 @@ class RelocationCaseService:
 
         # Применяем переход
         data = RelocationCaseUpdate(stage=next_stage)
-        updated = await self.repo.update(case, data)
+        await self.repo.update(case, data)
 
         # Записываем историю
         await self.history_repo.create(
@@ -177,7 +193,8 @@ class RelocationCaseService:
                 message=f"Ваш кейс перешёл на этап: {next_stage.value}",
             )
 
-        return RelocationCaseResponse.model_validate(updated)
+        row = await self.repo.get_enriched_by_id(case_id)
+        return self._build_response(row)
 
     async def _check_gate(self, case_id, case, next_stage, request: AdvanceStageRequest):
         if next_stage == RelocationStage.interview:

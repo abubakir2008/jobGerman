@@ -3,6 +3,23 @@ from pydantic import BaseModel
 from app.models.relocation import RelocationStage
 
 
+class CandidateShort(BaseModel):
+    id: int
+    full_name: str
+    email: str
+    phone: str | None = None
+
+    model_config = {"from_attributes": True}
+
+
+class ManagerShort(BaseModel):
+    id: int
+    full_name: str
+    email: str
+
+    model_config = {"from_attributes": True}
+
+
 class RelocationCaseUpdate(BaseModel):
     stage: RelocationStage | None = None
     manager_id: int | None = None
@@ -17,6 +34,10 @@ class RelocationCaseResponse(BaseModel):
     stage: RelocationStage
     notes: str | None
     stage_deadline: date | None = None
+    # Расширения — чтобы UI показывал имена, а не номера
+    candidate: CandidateShort | None = None
+    manager: ManagerShort | None = None
+    job_title: str | None = None
 
     model_config = {"from_attributes": True}
 
@@ -48,6 +69,7 @@ class CaseHistoryItem(BaseModel):
     case_id: int
     stage: RelocationStage
     changed_by_id: int | None
+    changed_by_name: str | None = None
     changed_at: datetime
     note: str | None
 

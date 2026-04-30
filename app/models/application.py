@@ -29,12 +29,19 @@ class Application(Base, TimestampMixin):
         Enum(ApplicationStatus), default=ApplicationStatus.pending, index=True
     )
     cover_letter: Mapped[str | None] = mapped_column(Text)
+    # Опциональный CV-документ, прикреплённый к отклику
+    cv_document_id: Mapped[int | None] = mapped_column(
+        ForeignKey("documents.id", ondelete="SET NULL"), nullable=True
+    )
 
     # Relationships
     candidate: Mapped["User"] = relationship(back_populates="applications")  # noqa: F821
     job: Mapped["Job"] = relationship(back_populates="applications")  # noqa: F821
     relocation_case: Mapped["RelocationCase"] = relationship(  # noqa: F821
         back_populates="application", uselist=False
+    )
+    cv_document: Mapped["Document | None"] = relationship(  # noqa: F821
+        foreign_keys=[cv_document_id]
     )
 
     def __repr__(self) -> str:

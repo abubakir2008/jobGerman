@@ -10,6 +10,9 @@ from app.api.v1.endpoints import (
     user_router,
     chat_router,
     notification_router,
+    admin_stats_router,
+    resume_router,
+    test_router,
 )
 
 router = APIRouter(prefix="/api/v1")
@@ -24,3 +27,6 @@ router.include_router(media_router.router,          prefix="/media",         tag
 router.include_router(user_router.router,           prefix="/users",         tags=["Users (Admin)"])
 router.include_router(chat_router.router,           prefix="",               tags=["Chat"])
 router.include_router(notification_router.router,   prefix="/notifications", tags=["Notifications"])
+router.include_router(admin_stats_router.router,    prefix="/admin",         tags=["Admin"])
+router.include_router(resume_router.router,         prefix="/resume",        tags=["Resume"])
+router.include_router(test_router.router,           prefix="/tests",         tags=["Tests"])

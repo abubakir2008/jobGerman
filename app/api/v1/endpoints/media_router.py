@@ -1,5 +1,5 @@
 import json
-from fastapi import APIRouter, Depends, File, Form, Query, UploadFile
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config.database import get_db
@@ -9,6 +9,7 @@ from app.models.user import User
 from app.repositories.media_repository import MediaRepository
 from app.schemas.media import MediaResponse, MediaListResponse, MediaUpdate, UsefulLink
 from app.service.media_service import MediaService
+from app.storage.minio import get_presigned_url_from_file_url
 
 router = APIRouter()
 
@@ -43,6 +44,26 @@ async def get_media_item(
 ):
     """Получить материал с инструкцией и полезными ссылками."""
     return await service.get_by_id(media_id)
+
+
+@router.get("/{media_id}/download")
+async def get_media_download_url(
+    media_id: int,
+    expires_minutes: int = Query(60, ge=1, le=24 * 60),
+    current_user: User = Depends(get_current_user),
+    service: MediaService = Depends(get_media_service),
+):
+    """Временный URL для просмотра/скачивания файла обучающего материала."""
+    media = await service.get_by_id(media_id)
+    if not media:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Media not found.")
+    url = get_presigned_url_from_file_url(media.file_url, expires_minutes)
+    return {
+        "url": url,
+        "file_name": media.file_name,
+        "mime_type": media.mime_type,
+        "expires_in": expires_minutes * 60,
+    }
 
 
 @router.post("/upload", response_model=MediaResponse, status_code=201)

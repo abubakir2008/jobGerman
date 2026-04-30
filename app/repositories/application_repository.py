@@ -22,7 +22,10 @@ class ApplicationRepository:
     ) -> tuple[list[Application], int]:
         query = (
             select(Application)
-            .options(selectinload(Application.relocation_case))
+            .options(
+                selectinload(Application.relocation_case),
+                selectinload(Application.cv_document),
+            )
         )
         if candidate_id:
             query = query.where(Application.candidate_id == candidate_id)
@@ -38,7 +41,10 @@ class ApplicationRepository:
     async def get_by_id(self, application_id: int) -> Application | None:
         result = await self.db.execute(
             select(Application)
-            .options(selectinload(Application.relocation_case))
+            .options(
+                selectinload(Application.relocation_case),
+                selectinload(Application.cv_document),
+            )
             .where(Application.id == application_id)
         )
         return result.scalar_one_or_none()
@@ -66,7 +72,10 @@ class ApplicationRepository:
         # Перезагружаем с relocation_case
         result = await self.db.execute(
             select(Application)
-            .options(selectinload(Application.relocation_case))
+            .options(
+                selectinload(Application.relocation_case),
+                selectinload(Application.cv_document),
+            )
             .where(Application.id == application.id)
         )
         return result.scalar_one()
@@ -79,7 +88,10 @@ class ApplicationRepository:
         # Перезагружаем с relocation_case
         result = await self.db.execute(
             select(Application)
-            .options(selectinload(Application.relocation_case))
+            .options(
+                selectinload(Application.relocation_case),
+                selectinload(Application.cv_document),
+            )
             .where(Application.id == application.id)
         )
         return result.scalar_one()
